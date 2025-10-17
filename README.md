@@ -4,12 +4,14 @@ Premièrement il est nécessaire d'utiliser Python3.11
 Une fois la bonne version de python installée, créer un environnement virtuel:
 ```bash
 python -m venv venv
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 ```
 Et l'activer.
 
 Ensuite il faut installer les requirements:
 ```bash
 pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 
 Pour lancer une partie, on peut utiliser les commandes présentées dans l'énoncé:
