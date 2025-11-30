@@ -5,8 +5,8 @@ from seahorse.utils.custom_exceptions import MethodNotImplementedError
 import random, time
 from typing import Dict, Tuple, List
 
-from hex_player_helper import HexPlayerHelper, MCTSNode
-from hex_player_debug import HexPlayerDebug
+from src_2214742_2194547.hex_player_helper import HexPlayerHelper, MCTSNode
+# from hex_player_debug import HexPlayerDebug
 
 
 class MyPlayer(PlayerHex):
@@ -45,7 +45,7 @@ class MyPlayer(PlayerHex):
         
         self._bridge_offsets = self._precompute_bridge_offsets()
         self._helper = HexPlayerHelper(self)
-        self._debug = HexPlayerDebug(self, self._helper)
+        # self._debug = HexPlayerDebug(self, self._helper)
         
         goal_direction = "TOP→BOTTOM" if piece_type == "R" else "LEFT→RIGHT"
         print(f"🎯 Player initialized: {name} as {piece_type} (Goal: {goal_direction})")
@@ -129,7 +129,7 @@ class MyPlayer(PlayerHex):
                 raise MethodNotImplementedError("No legal actions in terminal state")
             return current_state.convert_heavy_action_to_light_action(actions[0])
         
-        self._debug.print_bridge_analysis(current_state)
+        # self._debug.print_bridge_analysis(current_state)
         
         actions = list(current_state.get_possible_heavy_actions())
         if not actions:
