@@ -1,3 +1,6 @@
+# Aya Chetto (2194547)
+# Camille Ménard (2214742)
+
 from player_hex import PlayerHex
 from seahorse.game.action import Action
 from seahorse.game.game_state import GameState
@@ -5,7 +8,7 @@ from seahorse.utils.custom_exceptions import MethodNotImplementedError
 import math, random, time
 from typing import Dict, Tuple, List, Set, Optional
 import heapq
-from collections import deque # Ajouté pour le BFS (shortest_path_distance)
+from collections import deque
 
 
 class MCTSNode:
@@ -47,7 +50,7 @@ class MCTSNode:
                 try:
                     self._all_actions = list(self.state.get_possible_heavy_actions())
                 except Exception:
-                    # Sécurité: Si l'accès aux actions échoue, considérez comme terminal.
+                    # Sécurité: Si l'accès aux actions échoue, considérer comme terminal.
                     self._all_actions = []
                     self.is_terminal = True 
                 
@@ -95,10 +98,6 @@ class MCTSNode:
         """Update node statistics after a simulation."""
         self.visits += 1
         self.total_value += value
-    
-    # Suppression de __repr__ pour la sécurité I/O.
-    # def __repr__(self):
-    #     return f"MCTSNode(visits={self.visits}, value={self.total_value:.2f}, children={len(self.children)})"
 
 
 class MyPlayer(PlayerHex):
@@ -106,7 +105,7 @@ class MyPlayer(PlayerHex):
     Player class for Hex game with Bridge-focused MCTS + Alpha-Beta.
     """
 
-    # ========== BRIDGE PATTERN DEFINITIONS (Inchangées) ==========
+    # ========== BRIDGE PATTERN DEFINITIONS ==========
     BRIDGE_PATTERNS = [
         ((0, 0), (1, 1), (0, 1), (1, 0)),
         ((0, 0), (-1, -1), (0, -1), (-1, 0)),
@@ -143,13 +142,7 @@ class MyPlayer(PlayerHex):
         super().__init__(piece_type, name)
         self.opp_type = "B" if piece_type == "R" else "R"
 
-        # --- CORRECTION 1: INITIALISATION PARESSEUSE (Lazy Initialization) ---
-        # Préfixé pour ne pas être enregistré dans le JSON
         self._bridge_offsets = None  
-        
-        # Suppression de l'affichage d'initialisation pour la sécurité I/O.
-        # goal_direction = "TOP→BOTTOM" if piece_type == "R" else "LEFT→RIGHT"
-        # print(f"🎯 Player initialized: {name} as {piece_type} (Goal: {goal_direction})")
     
     def _get_bridge_offsets(self) -> List[Tuple[Tuple[int, int], Tuple[int, int], Tuple[int, int]]]:
         """Calcule ou retourne les offsets de ponts (Calcul Paresseux)."""
@@ -157,7 +150,7 @@ class MyPlayer(PlayerHex):
             self._bridge_offsets = self._precompute_bridge_offsets()
         return self._bridge_offsets
 
-    # ========== DYNAMIC WEIGHT CALCULATION (SÉCURISÉ contre ZeroDivisionError) ==========
+    # ========== DYNAMIC WEIGHT CALCULATION ==========
 
     def get_dynamic_center_weight(self, state: GameState) -> float:
         """
@@ -228,7 +221,7 @@ class MyPlayer(PlayerHex):
 
         return bridge_patterns
 
-    # ========== BRIDGE DETECTION (Mise à jour pour _get_bridge_offsets) ==========
+    # ========== BRIDGE DETECTION ==========
 
     def find_bridges(self, state: GameState, piece_type: str) -> List[Dict]:
         """Find all bridge structures for a given player."""
@@ -243,7 +236,6 @@ class MyPlayer(PlayerHex):
         for (i, j), piece in env.items():
             if piece.get_type() != piece_type: continue
 
-            # --- CORRECTION: UTILISE _get_bridge_offsets() ---
             for partner_off, carrier1_off, carrier2_off in self._get_bridge_offsets():
                 partner = (i + partner_off[0], j + partner_off[1])
                 carrier1 = (i + carrier1_off[0], j + carrier1_off[1])
@@ -286,7 +278,7 @@ class MyPlayer(PlayerHex):
         else:
             return "opponent"
 
-    # ========== THREATENED BRIDGE DETECTION (Logique conservée) ==========
+    # ========== THREATENED BRIDGE DETECTION ==========
 
     def find_threatened_bridges(self, state: GameState) -> List[Dict]:
         bridges = self.find_bridges(state, self.piece_type)
@@ -344,7 +336,7 @@ class MyPlayer(PlayerHex):
 
     # ========== IMPLEMENTATION DES PLACEHOLDERS NÉCESSAIRES POUR AB ==========
     
-    # Placeholder for remaining methods (must be completed by user)
+    # Placeholder for remaining methods
     def score_bridges(self, state: GameState, piece_type: str) -> float: return 0.0
     def local_connectivity_score(self, state: GameState, pos: Tuple[int, int], piece_type: str) -> float: return 0.0
     def find_cut_points(self, state: GameState, opponent_type: str) -> List[Tuple[Tuple[int, int], float]]: return []
@@ -438,7 +430,6 @@ class MyPlayer(PlayerHex):
                     # Coût très élevé pour un blocage (pour l'instant, on ignore les blocages simples)
                     continue 
 
-                # Optionnel: Intégrer la logique des ponts/tunnels ici (non implémenté pour ce simple BFS)
 
                 if next_pos not in visited or new_dist < visited[next_pos]:
                     visited[next_pos] = new_dist
@@ -477,11 +468,6 @@ class MyPlayer(PlayerHex):
         
         # Heuristique de base: opp_dist - my_dist. Plus grand est meilleur pour nous.
         base_score = opp_dist - my_dist
-        
-        # 2. Ajout de poids/heuristiques supplémentaires (Ponts, Centre, etc.)
-        # Ceci est essentiel pour une AB performante.
-        # score += self.score_bridges(state, self.piece_type) * self._W_BRIDGE
-        # ... autres heuristiques ...
         
         return base_score
 
@@ -639,7 +625,7 @@ class MyPlayer(PlayerHex):
                 score = node.player_ref.fast_heuristic(next_state) 
                 action_scores.append((action, score))
             
-            # Sélectionnez la meilleure action selon l'heuristique
+            # Sélectionner la meilleure action selon l'heuristique
             action_scores.sort(key=lambda x: -x[1])
             action = action_scores[0][0]
         else:
